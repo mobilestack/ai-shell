@@ -128,9 +128,9 @@ export async function prompt({
   console.log('');
   console.log(dim('•'));
   if (!skipCommandExplanation) {
-    spin.start(i18n.t(`Getting explanation...`));
     const info = await readInfo(process.stdout.write.bind(process.stdout));
     if (!info || !hasScript) {
+      spin.start(i18n.t(`Getting explanation...`));
       const { readExplanation } = await getExplanation({
         script,
         key,
@@ -141,6 +141,9 @@ export async function prompt({
       console.log('');
       await readExplanation(process.stdout.write.bind(process.stdout));
       console.log('');
+      console.log('');
+      console.log(dim('•'));
+    } else if (info) {
       console.log('');
       console.log(dim('•'));
     }
@@ -245,9 +248,9 @@ async function revisionFlow(
 
   if (!silentMode) {
     const infoSpin = p.spinner();
-    infoSpin.start(i18n.t(`Getting explanation...`));
     const info = await readInfo(process.stdout.write.bind(process.stdout));
     if (!info || !hasScript) {
+      infoSpin.start(i18n.t(`Getting explanation...`));
       const { readExplanation } = await getExplanation({
         script,
         key,
@@ -259,6 +262,9 @@ async function revisionFlow(
       console.log('');
       await readExplanation(process.stdout.write.bind(process.stdout));
       console.log('');
+      console.log('');
+      console.log(dim('•'));
+    } else if (info) {
       console.log('');
       console.log(dim('•'));
     }
