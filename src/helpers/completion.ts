@@ -91,7 +91,6 @@ export async function getScriptAndInfo({
       }
       return Promise.resolve(explanation);
     },
-    hasScript: !!script,
   };
 }
 
@@ -268,7 +267,6 @@ export async function getRevision({
       }
       return Promise.resolve(explanation);
     },
-    hasScript: !!script,
   };
 }
 
@@ -376,20 +374,25 @@ function getOperationSystemDetails() {
   const os = require('@nexssp/os/legacy');
   return os.name();
 }
-const generationDetails = dedent`
+function getGenerationDetails() {
+  return dedent`
     Reply with two parts:
-    1. The command inside a markdown code block with bash or sh language identifier (format: \`\`\`bash\\nyour command here\\n\`\`\`)
+    1. The command inside a markdown code block (format: \`\`\`bash\\nyour command here\\n\`\`\`)
     2. A brief explanation of what the command does
 
-    Example format:
+    Example:
     \`\`\`bash
-    your single line command here
+    your command here
     \`\`\`
+    Explanation text here.
 
-    Brief explanation of the command.
+    **IMPORTANT**: Use macOS-compatible syntax (prefer short options like \`-r\` over \`--reverse\`). Mention in explanation if command differs between macOS/Linux (if same, don't mention).
 
-    Make sure the command runs on ${getOperationSystemDetails()} operating system.
+    Make sure the command runs on ${getOperationSystemDetails()}.
+
+    **Language**: Explain in ${i18n.getCurrentLanguagenName()}.
   `;
+}
 
 function getFullPrompt(prompt: string) {
   return dedent`
@@ -397,7 +400,7 @@ function getFullPrompt(prompt: string) {
 
     ${shellDetails}
 
-    ${generationDetails}
+    ${getGenerationDetails()}
 
     ${explainInSecondRequest ? '' : explainScript}
 
@@ -413,7 +416,7 @@ function getRevisionPrompt(prompt: string, code: string) {
 
     The prompt: ${prompt}
 
-    ${generationDetails}
+    ${getGenerationDetails()}
   `;
 }
 

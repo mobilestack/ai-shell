@@ -2,7 +2,6 @@ import * as p from '@clack/prompts';
 import { execaCommand } from 'execa';
 import { cyan, dim } from 'kolorist';
 import {
-  getExplanation,
   getRevision,
   getScriptAndInfo,
 } from './helpers/completion';
@@ -115,7 +114,7 @@ export async function prompt({
   const thePrompt = usePrompt || (await getPrompt());
   const spin = p.spinner();
   spin.start(i18n.t(`Loading...`));
-  const { readInfo, readScript, hasScript } = await getScriptAndInfo({
+  const { readInfo, readScript } = await getScriptAndInfo({
     prompt: thePrompt,
     key,
     model,
@@ -129,24 +128,11 @@ export async function prompt({
   console.log(dim('•'));
   if (!skipCommandExplanation) {
     const info = await readInfo(process.stdout.write.bind(process.stdout));
-    if (!info || !hasScript) {
-      spin.start(i18n.t(`Getting explanation...`));
-      const { readExplanation } = await getExplanation({
-        script,
-        key,
-        model,
-        apiEndpoint,
-      });
-      spin.stop(`${i18n.t('Explanation')}:`);
-      console.log('');
-      await readExplanation(process.stdout.write.bind(process.stdout));
-      console.log('');
-      console.log('');
-      console.log(dim('•'));
-    } else if (info) {
+    if (info) {
       console.log('');
       console.log(dim('•'));
     }
+    // Note: If AI didn't provide explanation, we accept it rather than making a second API call
   }
 
   await runOrReviseFlow(script, key, model, apiEndpoint, silentMode);
@@ -231,7 +217,7 @@ async function revisionFlow(
   const revision = await promptForRevision();
   const spin = p.spinner();
   spin.start(i18n.t(`Loading...`));
-  const { readScript, readInfo, hasScript } = await getRevision({
+  const { readScript, readInfo } = await getRevision({
     prompt: revision,
     code: currentScript,
     key,
@@ -247,27 +233,12 @@ async function revisionFlow(
   console.log(dim('•'));
 
   if (!silentMode) {
-    const infoSpin = p.spinner();
     const info = await readInfo(process.stdout.write.bind(process.stdout));
-    if (!info || !hasScript) {
-      infoSpin.start(i18n.t(`Getting explanation...`));
-      const { readExplanation } = await getExplanation({
-        script,
-        key,
-        model,
-        apiEndpoint,
-      });
-
-      infoSpin.stop(`${i18n.t('Explanation')}:`);
-      console.log('');
-      await readExplanation(process.stdout.write.bind(process.stdout));
-      console.log('');
-      console.log('');
-      console.log(dim('•'));
-    } else if (info) {
+    if (info) {
       console.log('');
       console.log(dim('•'));
     }
+    // Note: If AI didn't provide explanation, we accept it rather than making a second API call
   }
 
   await runOrReviseFlow(script, key, model, apiEndpoint, silentMode);
