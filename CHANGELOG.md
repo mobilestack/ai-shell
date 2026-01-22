@@ -1,3 +1,11 @@
+## 1.1.0
+
+- **Breaking change**: Package renamed to `@mobilest/ai-shell`
+- **Fix**: Improve prompt to ensure AI returns commands in markdown code blocks with explanations
+- **Fix**: Extract command and explanation separately from AI response
+- **Fix**: Handle cases where AI doesn't return code block format by treating response as explanation
+- **Update**: Repository moved to https://github.com/mobilestack/ai-shell
+
 ## 1.0.12
 
 - Bug fixes

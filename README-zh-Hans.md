@@ -9,7 +9,7 @@
    一个将自然语言转换为 Shell 命令的 CLI。
 </h4>
 <p align="center">
-   <a href="https://www.npmjs.com/package/@builder.io/ai-shell"><img src="https://img.shields.io/npm/v/@builder.io/ai-shell" alt="Current version"></a>
+   <a href="https://www.npmjs.com/package/@mobilest/ai-shell"><img src="https://img.shields.io/npm/v/@mobilest/ai-shell" alt="Current version"></a>
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 1. 安装 _ai shell_:
 
    ```sh
-   npm install -g @builder.io/ai-shell
+   npm install -g @mobilest/ai-shell
    ```
 
 2. 从 [OpenAI](https://platform.openai.com/account/api-keys) 获取您的 API 密钥
@@ -196,10 +196,10 @@ ai config
 ai --version
 ```
 
-如果它不是[最新版本](https://github.com/BuilderIO/ai-shell/tags)，请运行：
+如果它不是[最新版本](https://github.com/mobilestack/ai-shell/tags)，请运行：
 
 ```bash
-npm update -g @builder.io/ai-shell
+npm update -g @mobilest/ai-shell
 ```
 
 或者只需使用 AI shell：
@@ -222,7 +222,7 @@ ai update
 
 ## 贡献
 
-如果您想在 [Issues](https://github.com/BuilderIO/ai-shell/issues) 中修复错误或实现功能（提示：注意 `help wanted` 标签），请查看 [Contribution Guide](CONTRIBUTING.md) 以了解如何设置项目。
+如果您想在 [Issues](https://github.com/mobilestack/ai-shell/issues) 中修复错误或实现功能（提示：注意 `help wanted` 标签），请查看 [Contribution Guide](CONTRIBUTING.md) 以了解如何设置项目。
 
 ## 致谢
 

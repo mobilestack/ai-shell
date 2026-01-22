@@ -29,6 +29,27 @@ function getOpenAi(key: string, apiEndpoint: string) {
 // a github style like: "```bash"
 const shellCodeExclusions = [/```[a-zA-Z]*\n/gi, /```[a-zA-Z]*/gi, '\n'];
 
+/**
+ * Extract command from code block and explanation from the rest of the text
+ */
+function extractScriptAndExplanation(fullResponse: string): { script: string; explanation: string } {
+  // Match code blocks: ```bash or ```sh or ``` (generic)
+  const codeBlockRegex = /```(?:bash|sh)?\s*\n([\s\S]*?)\n```/i;
+  const match = fullResponse.match(codeBlockRegex);
+
+  if (match && match[1]) {
+    // Extract the command from the code block
+    const script = match[1].trim();
+    // Remove the code block part to get the explanation
+    const explanation = fullResponse.replace(codeBlockRegex, '').trim();
+    return { script, explanation };
+  }
+
+  // If no code block found, treat the entire response as explanation
+  // and return empty script (user will be prompted to revise)
+  return { script: '', explanation: fullResponse.trim() };
+}
+
 export async function getScriptAndInfo({
   prompt,
   key,
@@ -49,10 +70,55 @@ export async function getScriptAndInfo({
     apiEndpoint,
   });
   const iterableStream = streamToIterable(stream);
+
+  // Read the complete response first
+  const fullResponse = await readFullResponse(iterableStream);
+
+  // Extract script and explanation from the response
+  const { script, explanation } = extractScriptAndExplanation(fullResponse);
+
+  // Return functions that provide the separated content
   return {
-    readScript: readData(iterableStream, ...shellCodeExclusions),
-    readInfo: readData(iterableStream, ...shellCodeExclusions),
+    readScript: (writer: (data: string) => void) => {
+      if (script) {
+        writer(script);
+      }
+      return Promise.resolve(script);
+    },
+    readInfo: (writer: (data: string) => void) => {
+      if (explanation) {
+        writer(explanation);
+      }
+      return Promise.resolve(explanation);
+    },
+    hasScript: !!script,
   };
+}
+
+/**
+ * Read the complete response from the stream
+ */
+async function readFullResponse(
+  iterableStream: AsyncGenerator<string, void>
+): Promise<string> {
+  let fullResponse = '';
+  let content = '';
+
+  for await (const chunk of iterableStream) {
+    const payloads = chunk.toString().split('\n\n');
+    for (const payload of payloads) {
+      if (payload.includes('[DONE]')) {
+        return fullResponse;
+      }
+
+      if (payload.startsWith('data:')) {
+        content = parseContent(payload);
+        fullResponse += content;
+      }
+    }
+  }
+
+  return fullResponse;
 }
 
 export async function generateCompletion({
@@ -181,8 +247,28 @@ export async function getRevision({
     apiEndpoint,
   });
   const iterableStream = streamToIterable(stream);
+
+  // Read the complete response first
+  const fullResponse = await readFullResponse(iterableStream);
+
+  // Extract script and explanation from the response
+  const { script, explanation } = extractScriptAndExplanation(fullResponse);
+
+  // Return functions that provide the separated content
   return {
-    readScript: readData(iterableStream, ...shellCodeExclusions),
+    readScript: (writer: (data: string) => void) => {
+      if (script) {
+        writer(script);
+      }
+      return Promise.resolve(script);
+    },
+    readInfo: (writer: (data: string) => void) => {
+      if (explanation) {
+        writer(explanation);
+      }
+      return Promise.resolve(explanation);
+    },
+    hasScript: !!script,
   };
 }
 
@@ -249,18 +335,21 @@ export const readData =
         }
       }
 
-      function parseContent(payload: string): string {
-        const data = payload.replaceAll(/(\n)?^data:\s*/g, '');
-        try {
-          const delta = JSON.parse(data.trim());
-          return delta.choices?.[0]?.delta?.content ?? '';
-        } catch (error) {
-          return `Error with JSON.parse and ${payload}.\n${error}`;
-        }
-      }
-
       resolve(data);
     });
+
+/**
+ * Parse content from SSE payload
+ */
+function parseContent(payload: string): string {
+  const data = payload.replaceAll(/(\n)?^data:\s*/g, '');
+  try {
+    const delta = JSON.parse(data.trim());
+    return delta.choices?.[0]?.delta?.content ?? '';
+  } catch (error) {
+    return `Error with JSON.parse and ${payload}.\n${error}`;
+  }
+}
 
 function getExplanationPrompt(script: string) {
   return dedent`
@@ -288,7 +377,16 @@ function getOperationSystemDetails() {
   return os.name();
 }
 const generationDetails = dedent`
-    Only reply with the single line command surrounded by three backticks. It must be able to be directly run in the target shell. Do not include any other text.
+    Reply with two parts:
+    1. The command inside a markdown code block with bash or sh language identifier (format: \`\`\`bash\\nyour command here\\n\`\`\`)
+    2. A brief explanation of what the command does
+
+    Example format:
+    \`\`\`bash
+    your single line command here
+    \`\`\`
+
+    Brief explanation of the command.
 
     Make sure the command runs on ${getOperationSystemDetails()} operating system.
   `;

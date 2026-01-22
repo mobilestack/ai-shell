@@ -12,7 +12,7 @@ export default command(
   },
   async () => {
     console.log('');
-    const command = `npm update -g @builder.io/ai-shell`;
+    const command = `npm update -g @mobilest/ai-shell`;
     console.log(dim(`${i18n.t('Running')}: ${command}`));
     console.log('');
     await execaCommand(command, {

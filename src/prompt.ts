@@ -115,7 +115,7 @@ export async function prompt({
   const thePrompt = usePrompt || (await getPrompt());
   const spin = p.spinner();
   spin.start(i18n.t(`Loading...`));
-  const { readInfo, readScript } = await getScriptAndInfo({
+  const { readInfo, readScript, hasScript } = await getScriptAndInfo({
     prompt: thePrompt,
     key,
     model,
@@ -130,7 +130,7 @@ export async function prompt({
   if (!skipCommandExplanation) {
     spin.start(i18n.t(`Getting explanation...`));
     const info = await readInfo(process.stdout.write.bind(process.stdout));
-    if (!info) {
+    if (!info || !hasScript) {
       const { readExplanation } = await getExplanation({
         script,
         key,
@@ -228,7 +228,7 @@ async function revisionFlow(
   const revision = await promptForRevision();
   const spin = p.spinner();
   spin.start(i18n.t(`Loading...`));
-  const { readScript } = await getRevision({
+  const { readScript, readInfo, hasScript } = await getRevision({
     prompt: revision,
     code: currentScript,
     key,
@@ -246,19 +246,22 @@ async function revisionFlow(
   if (!silentMode) {
     const infoSpin = p.spinner();
     infoSpin.start(i18n.t(`Getting explanation...`));
-    const { readExplanation } = await getExplanation({
-      script,
-      key,
-      model,
-      apiEndpoint,
-    });
+    const info = await readInfo(process.stdout.write.bind(process.stdout));
+    if (!info || !hasScript) {
+      const { readExplanation } = await getExplanation({
+        script,
+        key,
+        model,
+        apiEndpoint,
+      });
 
-    infoSpin.stop(`${i18n.t('Explanation')}:`);
-    console.log('');
-    await readExplanation(process.stdout.write.bind(process.stdout));
-    console.log('');
-    console.log('');
-    console.log(dim('•'));
+      infoSpin.stop(`${i18n.t('Explanation')}:`);
+      console.log('');
+      await readExplanation(process.stdout.write.bind(process.stdout));
+      console.log('');
+      console.log('');
+      console.log(dim('•'));
+    }
   }
 
   await runOrReviseFlow(script, key, model, apiEndpoint, silentMode);

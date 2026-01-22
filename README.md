@@ -9,7 +9,7 @@
    A CLI that converts natural language to shell commands.
 </h4>
 <p align="center">
-   <a href="https://www.npmjs.com/package/@builder.io/ai-shell"><img src="https://img.shields.io/npm/v/@builder.io/ai-shell" alt="Current version"></a>
+   <a href="https://www.npmjs.com/package/@mobilest/ai-shell"><img src="https://img.shields.io/npm/v/@mobilest/ai-shell" alt="Current version"></a>
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 1. Install _ai shell_:
 
    ```sh
-   npm install -g @builder.io/ai-shell
+   npm install -g @mobilest/ai-shell
    ```
 
 2. Retrieve your API key from [OpenAI](https://platform.openai.com/account/api-keys)
@@ -195,10 +195,10 @@ Check the installed version with:
 ai --version
 ```
 
-If it's not the [latest version](https://github.com/BuilderIO/ai-shell/tags), run:
+If it's not the [latest version](https://github.com/mobilestack/ai-shell/tags), run:
 
 ```bash
-npm update -g @builder.io/ai-shell
+npm update -g @mobilest/ai-shell
 ```
 
 Or just use AI shell:
@@ -221,7 +221,7 @@ I am not a bash wizard, and am dying for access to the copilot CLI, and got impa
 
 ## Contributing
 
-If you want to help fix a bug or implement a feature in [Issues](https://github.com/BuilderIO/ai-shell/issues) (tip: look out for the `help wanted` label), checkout the [Contribution Guide](CONTRIBUTING.md) to learn how to setup the project.
+If you want to help fix a bug or implement a feature in [Issues](https://github.com/mobilestack/ai-shell/issues) (tip: look out for the `help wanted` label), checkout the [Contribution Guide](CONTRIBUTING.md) to learn how to setup the project.
 
 ## Credit
 
