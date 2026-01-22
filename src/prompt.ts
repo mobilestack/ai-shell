@@ -1,5 +1,5 @@
 import * as p from '@clack/prompts';
-import { execaCommand } from 'execa';
+import { execa } from 'execa';
 import { cyan, dim } from 'kolorist';
 import {
   getRevision,
@@ -39,9 +39,8 @@ async function runScript(script: string) {
   p.outro(`${i18n.t('Running')}: ${script}`);
   console.log('');
   try {
-    await execaCommand(script, {
+    await execa(process.env.SHELL || '/bin/bash', ['-c', script], {
       stdio: 'inherit',
-      shell: process.env.SHELL || true,
     });
     appendToShellHistory(script);
   } catch (error) {

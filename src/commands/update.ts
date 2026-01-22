@@ -1,5 +1,5 @@
 import { command } from 'cleye';
-import { execaCommand } from 'execa';
+import { execa } from 'execa';
 import { dim } from 'kolorist';
 import i18n from '../helpers/i18n';
 
@@ -15,9 +15,8 @@ export default command(
     const command = `npm update -g @mobilest/ai-shell`;
     console.log(dim(`${i18n.t('Running')}: ${command}`));
     console.log('');
-    await execaCommand(command, {
+    await execa(process.env.SHELL || '/bin/bash', ['-c', command], {
       stdio: 'inherit',
-      shell: process.env.SHELL || true,
     }).catch(() => {
       // No need to handle, will go to stderr
     });
